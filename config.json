@@ -1,0 +1,6 @@
+{
+  "quality_threshold": 0.15,
+  "llm_model": "gemini-flash-lite-latest",
+  "max_batch_size": 500,
+  "db_path": "manga_titles.db"
+}

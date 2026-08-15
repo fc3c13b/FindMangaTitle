@@ -1,0 +1,12 @@
+# Docker Compose - FindMangaTitle API
+services:
+  findmangatitle:
+    image: ghcr.io/${GITHUB_REPOSITORY}:${TAG:-latest}
+    container_name: findmangatitle
+    restart: unless-stopped
+    ports:
+      - "${PORT:-8000}:8000"
+    env_file:
+      - .env
+    environment:
+      - PORT=8000
