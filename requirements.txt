@@ -1,0 +1,20 @@
+# FindMangaTitle - 漫画タイトル抽出ツール
+# 依存パッケージ
+
+# データ処理
+pandas>=2.0.0
+numpy>=1.24.0
+
+# LLM連携（Google Gemini API用）
+google-genai>=0.1.0
+
+# CLI UI（ラベリングツール用）
+rich>=13.0.0
+
+# ユーティリティ
+python-dotenv>=1.0.0
+
+# API サーバー
+fastapi>=0.100.0
+uvicorn>=0.23.0
+pydantic>=2.0.0
