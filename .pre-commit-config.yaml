@@ -1,0 +1,15 @@
+repos:
+  - repo: local
+    hooks:
+      - id: py-compile
+        name: Python Compile Check
+        entry: python -m py_compile
+        language: system
+        types: [python]
+        verbose: true
+      - id: flake8
+        name: Flake8 Lint
+        entry: flake8
+        language: system
+        types: [python]
+        additional_dependencies: [flake8]

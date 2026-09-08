@@ -21,6 +21,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Python Compile Check
+        run: |
+          python -m py_compile pipeline.py
+          python -m py_compile extractor.py
+          python -m py_compile database.py
+          python -m py_compile progress_monitor.py
+          python -m py_compile pattern_analyzer.py
+          echo "All Python files compiled successfully"
+
       - name: Read VERSION file
         id: version
         run: echo "version=$(cat VERSION)" >> $GITHUB_OUTPUT

@@ -8,8 +8,13 @@ pattern_analyzer.py - パターン分析・ルール生成スクリプト
 import re
 import json
 import os
+import time
 from typing import List, Tuple, Dict
 from collections import Counter
+
+# Gemini API リトライ設定（extractor.py と共通）
+GEMINI_RETRY_MAX_ATTEMPTS = 5
+GEMINI_RETRY_BASE_DELAY = 1.0
 
 from database import (
     get_learning_data,
@@ -198,19 +203,40 @@ def generate_rules_from_llm(learning_data: List[Tuple[str, str]], api_key: str =
     model_name = Config.get_llm_model()
 
     try:
-        response = client.models.generate_content(
-            model=model_name,
-            contents=prompt,
-        )
-        result_text = response.text.strip()
+        # 指数バックオフによるリトライロジック
+        last_error = None
+        for attempt in range(1, GEMINI_RETRY_MAX_ATTEMPTS + 1):
+            try:
+                response = client.models.generate_content(
+                    model=model_name,
+                    contents=prompt,
+                )
+                result_text = response.text.strip()
 
-        # JSONパース
-        json_match = re.search(r'\{.*\}', result_text, re.DOTALL)
-        if json_match:
-            data = json.loads(json_match.group())
-            return data.get("rules", [])
-    except json.JSONDecodeError:
-        print(f"JSONパース失敗: {result_text[:200]}")
+                # JSONパース
+                json_match = re.search(r'\{.*\}', result_text, re.DOTALL)
+                if json_match:
+                    data = json.loads(json_match.group())
+                    return data.get("rules", [])
+
+            except json.JSONDecodeError as e:
+                print(f"JSONパース失敗: {result_text[:200]}")
+                raise  # リトライ対象とする
+                
+            except Exception as e:
+                last_error = e
+                error_msg = str(e).lower()
+                
+                if "429" in error_msg or "resource_exhausted" in error_msg or "rate_limit" in error_msg:
+                    wait_time = GEMINI_RETRY_BASE_DELAY * (2 ** (attempt - 1))
+                    print(f"[LLM] レート制限超過 (試行 {attempt}/{GEMINI_RETRY_MAX_ATTEMPTS})。{wait_time:.1f}秒待機後リトライ...")
+                    time.sleep(wait_time)
+                else:
+                    print(f"[LLM] 呼び出しエラー: {e}")
+                    return []
+
+    except Exception as e:
+        print(f"[LLM] リトライ{GEMINI_RETRY_MAX_ATTEMPTS}回完了後も取得成功できませんでした: {last_error}")
 
     return []
 

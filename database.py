@@ -239,6 +239,18 @@ def log_processing(
     conn.close()
 
 
+def export_to_csv(output_path: str = "results.csv", db_path: str = DB_PATH):
+    """すべてのタイトルデータをCSVにエクスポート"""
+    import csv
+    results = get_all_titles(db_path)
+    with open(output_path, "w", newline="", encoding="utf-8-sig") as f:
+        writer = csv.writer(f)
+        writer.writerow(["folder_name", "correct_title"])
+        for row in results:
+            writer.writerow(row)
+    print(f"CSVエクスポート完了: {output_path} ({len(results)} 件)")
+
+
 def get_statistics(db_path: str = DB_PATH) -> dict:
     """統計情報を取得"""
     conn = get_connection(db_path)

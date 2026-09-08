@@ -13,8 +13,13 @@ rich>=13.0.0
 
 # ユーティリティ
 python-dotenv>=1.0.0
+PyQt5>=5.15.0
 
 # API サーバー
 fastapi>=0.100.0
 uvicorn>=0.23.0
 pydantic>=2.0.0
+
+# 開発ツール（Pre-commit Hooks）
+pre-commit>=3.0.0
+flake8>=6.0.0
